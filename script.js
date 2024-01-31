@@ -8,6 +8,8 @@ let bots =   [
 
 ]
 
+const PI = 3.1415926535897932384626433;
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   background(0, 40, 60);
@@ -19,9 +21,14 @@ function draw() {
   movePlayer();
 
   clear()
-  background(0, 40, 60);
   placePlayer(player);
 
+}
+
+function buildMap(params) {
+  
+  background(0, 40, 60);
+  
 }
 
 function movePlayer(){
@@ -40,15 +47,25 @@ function movePlayer(){
   }else{
     if (player[3] > 0){player[3]-=0.25}else if(player[3] < 0){player[3]+=0.25}
   }
+
+  /*var cosOfPlayer = (Math.atan((player[3] * -1)/player[2]))
+  var correctedCosOfPlayer = (player[2] < 0 || player[3] < 0) ? cosOfPlayer : (cosOfPlayer + PI);
+  player[4]= (player[2] != 0 || player[3] != 0) ? correctedCosOfPlayer : player[4];*/
+  player[4] = player[4] + 0.1
+  
+  
 }
 
 function placePlayer(player) {
   player[0]+=player[2]
   player[1]+=player[3]
+  translate(player[0], player[1]);
   fill(20, 255, 0);
-  circle(player[0], player[1], player[5]);
+  circle(0, 0, player[5]);
   fill(100, 255, 200);
-  circle(player[0], player[1], player[5] * 0.7);
+  circle(0, 0, player[5] * 0.7);
   fill(200, 50, 50);
-  rect(player[0], player[1], player[5], player[5])
+  rectMode(CORNER);
+  rotate(player[4] + (PI * 0.5));
+  rect(0 - (player[5] / 6), 5, player[5] / 3, player[5] * 0.6, 5);
 }
