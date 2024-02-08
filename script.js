@@ -3,7 +3,7 @@
 //           xPos,yPos, xMomentum, yMomentum, rotation, scale, alive
 let player = [-100, -100,   0,         0,         0,        60, true]
 
-let bots = new Array(5);
+let bots = new Array(10);
 for (let i = 0; i < bots.length; i++){
   bots[i] = [-1,   -1,    0,         0,         0,        30,    false];
 }
@@ -13,6 +13,8 @@ let shots = [];
 closestBot = 0;
 
 shotTime = 0;
+
+funMode = false;
 
 function setup() {
   createCanvas(windowWidth, windowHeight); 
@@ -35,6 +37,7 @@ function draw() {
     resetPlayer();
     resetBots();
     resetShots();
+    fun()
   
   }
 
@@ -70,37 +73,40 @@ function buildMap() {
 function resetBots() {
 
   for(let i = 0; i < bots.length; i++){
-
-    let touchingPlayer = true;
-
-    while (touchingPlayer){
     
-    if(!bots[i][6]){
-
-      bots[i][0] = Math.random() * windowWidth;
-      bots[i][1] = Math.random() * windowHeight;
-      bots[i][6] = true;
-      
-    }
-
-      if (findDistance(player[0], player[1], bots[i][0], bots[i][1]) > 9){
-        touchingPlayer = false;
+      if(!bots[i][6]){
+        
+        let touchingPlayer = true;
+        
+        while (touchingPlayer){
+  
+          bots[i][0] = Math.random() * windowWidth;
+          bots[i][1] = Math.random() * windowHeight;
+          bots[i][6] = true;
+  
+          if (findDistance(player[0], player[1], bots[i][0], bots[i][1]) > ((funMode) ? 20 : 14)){
+            touchingPlayer = false;
+          }
+          
+        }
+          
       }
       
-    }
+      
     
     if (findDistance(player[0], player[1], bots[i][0], bots[i][1]) < 7)
 
     if(bots[i][0] < 0 || bots[i][0] > windowWidth || bots[i][1] < 0 || bots[i][1] > windowHeight){
-      bots[i][6] = false;
+    bots[i][6] = false;
+      
     }
-    
-  }
   
+  }
+    
 }
 
 function findNearestBot() {
-
+  
   let minDistance = Infinity;
 
   for (let i = 0; i < bots.length; i++){
@@ -171,37 +177,6 @@ function buildBots() {
 
   }
 
-}
-
-function checkForHits() {
-
-  for (let i = 0; i < bots.length; i++){
-
-    for (let j = 0; j < shots.length; j++){
-
-      if (shots[j][6]){
-        
-        if (findDistance(bots[i][0], bots[i][1], shots[j][0], shots[j][1]) < 5){
-          bots[i][6] = false;
-        }
-        
-      }
-
-    }
-  
-    console.log(findDistance(player[0], player[1], bots[i][0], bots[i][1]));
-    
-    if (findDistance(player[0], player[1], bots[i][0], bots[i][1]) < 7){
-      window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ", '_blank').focus();
-      player[0] = -100
-      player[1] = -100
-      player[6] = false
-    }
-      
-    
-    
-  }
-  
 }
 
 //Player
@@ -291,7 +266,7 @@ function resetShots() {
 }
 
 function createShots() {
-
+  
   if(keyIsDown(32)){
 
     if (shotTime <= 0){
@@ -301,7 +276,34 @@ function createShots() {
       
       //         xPos      yPos,     xMomentum, yMomentum, rotation,         scale, alive
       shots.push([xdist ,   ydist,    0,         0,         player[4],        20,    true]);
-      shotTime = 20;
+      shotTime = (funMode) ? 0 : 20;
+
+      if (funMode){
+
+        xdist = player[0];
+        ydist = player[1];
+
+        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 0.1),        20,    true]);
+        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 0.2),        20,    true]);
+        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 0.3),        20,    true]);
+        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 0.4),        20,    true]);
+        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 0.5),        20,    true]);
+        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 0.6),        20,    true]);
+        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 0.7),        20,    true]);
+        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 0.8),        20,    true]);
+        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 0.9),        20,    true]);
+        shots.push([xdist ,   ydist,    0,         0,         player[4] - PI,        20,    true]);
+        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 1.1),        20,    true]);
+        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 1.2),        20,    true]);
+        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 1.3),        20,    true]);
+        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 1.4),        20,    true]);
+        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 1.5),        20,    true]);
+        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 1.6),        20,    true]);
+        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 1.7),        20,    true]);
+        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 1.8),        20,    true]);
+        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 1.9),        20,    true]);
+        
+      }
 
     }
  
@@ -338,4 +340,91 @@ function buildShots() {
 
   }
 
+}
+
+//Other
+
+function checkForHits() {
+
+  for (let i = 0; i < bots.length; i++){
+
+    for (let j = 0; j < shots.length; j++){
+
+      if (shots[j][6]){
+
+        if (findDistance(bots[i][0], bots[i][1], shots[j][0], shots[j][1]) < 5){
+          bots[i][6] = false;
+        }
+
+      }
+
+    }
+
+    if (findDistance(player[0], player[1], bots[i][0], bots[i][1]) < 7){
+      window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ", '_blank').focus();
+      player[0] = -100
+      player[1] = -100
+      player[6] = false
+    }
+
+
+
+  }
+
+}
+
+let timer = 0;
+let progress = 0;
+
+function fun() {
+
+  if (timer <= 0){
+    progress = 0;
+  }
+  
+  if(keyIsDown(UP_ARROW) && timer <= 0 && progress === 0){
+    timer = 20 * 8;
+    progress = 1;
+  }
+  if((!(keyIsDown(UP_ARROW))) && timer > 0 && progress === 1){
+    progress = 2;
+  }
+  if(keyIsDown(UP_ARROW) && timer > 0 && progress === 2){
+    progress = 3;
+  }
+  if(!keyIsDown(UP_ARROW) && timer > 0 && progress === 3){
+    progress = 4;
+  }
+  if(keyIsDown(DOWN_ARROW) && timer > 0 && progress === 4){
+    progress = 5;
+  }
+  if(!keyIsDown(DOWN_ARROW) && timer > 0 && progress === 5){
+    progress = 6;
+  }
+  if(keyIsDown(DOWN_ARROW) && timer > 0 && progress === 6){
+    progress = 7;
+  }
+  if(!keyIsDown(DOWN_ARROW) && timer > 0 && progress === 7){
+    progress = 8;  
+  }
+  if(keyIsDown(65) && timer > 0 && progress === 8){
+    progress = 9;
+  }
+  if(!keyIsDown(65) && timer > 0 && progress === 9){
+    progress = 10;
+  }
+  if(keyIsDown(66) && timer > 0 && progress === 10){
+    progress = 11;
+  }
+  if(!keyIsDown(66) && timer > 0 && progress === 11){
+    progress = 12; 
+  }
+  if(keyIsDown(13) && timer > 0 && progress === 12){
+    progress = 0;
+    funMode = true;
+  }
+
+
+  timer --
+  
 }
