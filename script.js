@@ -1,18 +1,22 @@
 //Hi Mr. Collins, this is Silas Moore. I would like to inform you that Dean Owen Dorner still smells and is a dork. Have a good day.
 
-//           xPos,yPos, xMomentum, yMomentum, rotation, scale, alive
-let player = [-100, -100,   0,         0,         0,        60, true]
+//           xPos,yPos, xMomentum, yMomentum, rotation, scale, alive, health
+let player = [-100, -100,   0,         0,         0,        60, true,  100]
 
 let bots = new Array(10);
 for (let i = 0; i < bots.length; i++){
   bots[i] = [-1,   -1,    0,         0,         0,        30,    false];
 }
 
+let playing = false;
+
 let shots = [];
 
-closestBot = 0;
+let closestBot = 0;
 
-shotTime = 0;
+let shotTime = 0;
+
+let score = 0;
 
 funMode = false;
 
@@ -25,31 +29,174 @@ function windowResized() {
 }
 
 function draw() { 
+  
+  document.getElementById("playGame").addEventListener("click", startGame);
+  document.getElementById("controls").addEventListener("click", function(){alert("WASD / Arrow keys to move. Space to shoot(Just reload)")});
+  document.getElementById("settings").addEventListener("click", function(){alert("Setings saved")});
 
-  if (player[6]){
-    
+  if (keyIsDown(13)) startGame();
+  
+  if (playing) runGame();
+  
+  fun();
+  updateScores();
+  clear()
+  buildMap();
+  resetPlayer();
+  buildShots();
+  buildBots();
+  buildPlayer();
+
+}
+//My functions
+
+function startGame() {
+  if (!playing){
+    playing = true;
+    document.getElementById("menu").style.margin = "200%";
+    resetGame()
+  }
+}
+
+function resetGame(){
+  shots = [];
+  player[0] = (windowWidth / 2);
+  player[1] = (windowHeight / 2);
+  player[7] = 100;
+  for (let i = 0; i < bots.length; i++){
+    bots[i] = [-1,   -1,    0,         0,         0,        30,    false];
+  }
+  score = 0;
+  
+}
+
+function updateScores() {
+  document.getElementById("health").innerHTML = ("Health: " + player[7]);
+  document.getElementById("score").innerHTML = ("Score: " + score);
+  document.getElementById("shotsFired").innerHTML = ("Shots Fired: " + shots.length);
+}
+
+function runGame() {
+
     findNearestBot();
     movePlayer();
     moveBots();
     moveShots();
     createShots();
     checkForHits()
-    resetPlayer();
+    playerHealth()
     resetBots();
     resetShots();
-    fun()
-  
-  }
-
-  clear()
-  buildMap();
-  buildShots();
-  buildBots();
-  buildPlayer();
 
 }
 
-//My functions
+function checkForHits() {
+
+  for (let i = 0; i < bots.length; i++){
+
+    for (let j = 0; j < shots.length; j++){
+
+      if (shots[j][6]){
+
+        if (findDistance(bots[i][0], bots[i][1], shots[j][0], shots[j][1]) < 5){
+          bots[i][6] = false;
+          score++;
+          if(funMode){
+            score*=2;
+          }
+        }
+
+      }
+
+    }
+
+    if (findDistance(player[0], player[1], bots[i][0], bots[i][1]) < 7){
+      player[7]--;
+    }
+
+
+
+  }
+
+}
+
+let timer = 0;
+let progress = 0;
+
+function playerHealth() {
+
+  if (player[7] <= 0 && !funMode) {
+    window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ", '_blank').focus();
+    document.getElementById("menu").style.margin = "20%";
+    document.getElementById("menuTitle").innerHTML = "YOU LOST";
+    player[0] = -100
+    player[1] = -100
+    player[6] = false
+    playing = false;
+  }
+
+  fill(100, 100, 100)
+  rect(30, 30, 100, 30)
+
+}
+
+function fun() {
+
+  if (timer <= 0){
+    progress = 0;
+  }
+
+  if(keyIsDown(UP_ARROW) && timer <= 0 && progress === 0){
+    timer = 20 * 8;
+    progress = 1;
+  }
+  if((!(keyIsDown(UP_ARROW))) && timer > 0 && progress === 1){
+    progress = 2;
+  }
+  if(keyIsDown(UP_ARROW) && timer > 0 && progress === 2){
+    progress = 3;
+  }
+  if(!keyIsDown(UP_ARROW) && timer > 0 && progress === 3){
+    progress = 4;
+  }
+  if(keyIsDown(DOWN_ARROW) && timer > 0 && progress === 4){
+    progress = 5;
+  }
+  if(!keyIsDown(DOWN_ARROW) && timer > 0 && progress === 5){
+    progress = 6;
+  }
+  if(keyIsDown(DOWN_ARROW) && timer > 0 && progress === 6){
+    progress = 7;
+  }
+  if(!keyIsDown(DOWN_ARROW) && timer > 0 && progress === 7){
+    progress = 8;  
+  }
+  if(keyIsDown(65) && timer > 0 && progress === 8){
+    progress = 9;
+  }
+  if(!keyIsDown(65) && timer > 0 && progress === 9){
+    progress = 10;
+  }
+  if(keyIsDown(66) && timer > 0 && progress === 10){
+    progress = 11;
+  }
+  if(!keyIsDown(66) && timer > 0 && progress === 11){
+    progress = 12; 
+  }
+  if(keyIsDown(13) && timer > 0 && progress === 12){
+    progress = 0;
+    funMode = true;
+  }
+
+
+  timer --
+
+  if (funMode){
+    player[7] = 3487575776834;
+  }
+
+}
+
 
 function findDistance(x1, y1, x2, y2){
 
@@ -237,7 +384,12 @@ function movePlayer() {
   let xdist = (player[0] - bots[closestBot][0]);
   let ydist = (player[1] - bots[closestBot][1]);
 
-  player[4] = (xdist > 0) ? (Math.atan(ydist / xdist)) + PI : Math.atan(ydist / xdist);
+  if (funMode){
+    player[4] += (PI * 0.01);
+  }else{
+    player[4] = (xdist > 0) ? (Math.atan(ydist / xdist)) + PI : Math.atan(ydist / xdist);
+  }
+
     
 }
 
@@ -276,33 +428,19 @@ function createShots() {
       
       //         xPos      yPos,     xMomentum, yMomentum, rotation,         scale, alive
       shots.push([xdist ,   ydist,    0,         0,         player[4],        20,    true]);
-      shotTime = (funMode) ? 0 : 20;
+      shotTime = (funMode) ? 0 : 30;
 
       if (funMode){
-
+  
         xdist = player[0];
         ydist = player[1];
 
-        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 0.1),        20,    true]);
-        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 0.2),        20,    true]);
-        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 0.3),        20,    true]);
-        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 0.4),        20,    true]);
-        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 0.5),        20,    true]);
-        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 0.6),        20,    true]);
-        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 0.7),        20,    true]);
-        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 0.8),        20,    true]);
-        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 0.9),        20,    true]);
-        shots.push([xdist ,   ydist,    0,         0,         player[4] - PI,        20,    true]);
-        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 1.1),        20,    true]);
-        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 1.2),        20,    true]);
-        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 1.3),        20,    true]);
-        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 1.4),        20,    true]);
-        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 1.5),        20,    true]);
-        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 1.6),        20,    true]);
-        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 1.7),        20,    true]);
-        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 1.8),        20,    true]);
-        shots.push([xdist ,   ydist,    0,         0,         player[4] - (PI * 1.9),        20,    true]);
-        
+        let angle = player[4];
+
+        while (angle < player[4] + (PI * 2)){
+          shots.push([xdist ,   ydist,    0,         0,         angle,        20,    true]);
+          angle += (PI * (2 / 30));
+        }
       }
 
     }
@@ -340,91 +478,4 @@ function buildShots() {
 
   }
 
-}
-
-//Other
-
-function checkForHits() {
-
-  for (let i = 0; i < bots.length; i++){
-
-    for (let j = 0; j < shots.length; j++){
-
-      if (shots[j][6]){
-
-        if (findDistance(bots[i][0], bots[i][1], shots[j][0], shots[j][1]) < 5){
-          bots[i][6] = false;
-        }
-
-      }
-
-    }
-
-    if (findDistance(player[0], player[1], bots[i][0], bots[i][1]) < 7){
-      window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ", '_blank').focus();
-      player[0] = -100
-      player[1] = -100
-      player[6] = false
-    }
-
-
-
-  }
-
-}
-
-let timer = 0;
-let progress = 0;
-
-function fun() {
-
-  if (timer <= 0){
-    progress = 0;
-  }
-  
-  if(keyIsDown(UP_ARROW) && timer <= 0 && progress === 0){
-    timer = 20 * 8;
-    progress = 1;
-  }
-  if((!(keyIsDown(UP_ARROW))) && timer > 0 && progress === 1){
-    progress = 2;
-  }
-  if(keyIsDown(UP_ARROW) && timer > 0 && progress === 2){
-    progress = 3;
-  }
-  if(!keyIsDown(UP_ARROW) && timer > 0 && progress === 3){
-    progress = 4;
-  }
-  if(keyIsDown(DOWN_ARROW) && timer > 0 && progress === 4){
-    progress = 5;
-  }
-  if(!keyIsDown(DOWN_ARROW) && timer > 0 && progress === 5){
-    progress = 6;
-  }
-  if(keyIsDown(DOWN_ARROW) && timer > 0 && progress === 6){
-    progress = 7;
-  }
-  if(!keyIsDown(DOWN_ARROW) && timer > 0 && progress === 7){
-    progress = 8;  
-  }
-  if(keyIsDown(65) && timer > 0 && progress === 8){
-    progress = 9;
-  }
-  if(!keyIsDown(65) && timer > 0 && progress === 9){
-    progress = 10;
-  }
-  if(keyIsDown(66) && timer > 0 && progress === 10){
-    progress = 11;
-  }
-  if(!keyIsDown(66) && timer > 0 && progress === 11){
-    progress = 12; 
-  }
-  if(keyIsDown(13) && timer > 0 && progress === 12){
-    progress = 0;
-    funMode = true;
-  }
-
-
-  timer --
-  
 }
